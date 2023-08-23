@@ -3,6 +3,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const ejs = require("ejs");
 const os = require('os');
+const https = require('https');
 const app = express();
 
 
@@ -16,6 +17,19 @@ function formatBytes(bytes) {
   const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
   return Math.round(bytes / Math.pow(1024, i), 2) + " " + sizes[i];
 }
+
+function keepAppRunning() {
+  setInterval(() => {
+    https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, (resp) => {
+      if (resp.statusCode === 200) {
+        console.log('Ping successful');
+      } else {
+        console.error('Ping failed');
+      }
+    });
+  }, 5 * 60 * 1000); // 5 minutes in milliseconds
+}
+
 
 app.get("/", (req, res) => {
   const memoryUsage = process.memoryUsage();
@@ -39,6 +53,10 @@ app.get("/", (req, res) => {
   };
 
   res.render("index", { memoryUsage, uptimeString, formatBytes, osInfo });
+});
+
+app.get('/ping', (req, res) => {
+  res.status(200).json({ message: 'Ping successful' });
 });
 
 
@@ -80,5 +98,6 @@ app.get('/search', async (req, res) => {
 });
 
 app.listen(3000, () => {
-  console.log(`Server is running on port 3000`);
+  console.log(`App is on port : 3000`);
+  keepAppRunning();
 });
