@@ -89,7 +89,7 @@ app.get('/search', async (req, res) => {
     const response = await axios.post(process.env.PINEY, formData, {
       headers: headers,
     });
-    console.log(response.status)
+    //console.log(response.status)
     res.send(response.data);
   } catch (error) {
     console.error(error.response.data);
@@ -105,7 +105,7 @@ app.get('/text', async (req, res) => {
       'user-agent': 'Pinterest for Android/11.29.2 (SM-G988N; 7.1.2)',
     };
     var quicks = `[${q}|rs|0]`
-    const response = await axios.get(`${process.env.PSEARCH}`, { headers: headers});
+    const response = await axios.get(`https://${process.env.PAPI}/?fields=pin.{description,created_at},pin.image_large_url&term_meta=${encodeURIComponent(quicks)}&query=${encodeURIComponent(q)}`, { headers: headers});
     res.send(response.data);
   } catch (error) {
     console.error(error.response.status);
