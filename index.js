@@ -100,13 +100,35 @@ app.get('/search', async (req, res) => {
 app.get('/text', async (req, res) => {
   const { q } = req.query;
   try {
-    const headers = {
-      'authorization': process.env.PKEY,
-      'user-agent': 'Pinterest for Android/11.29.2 (SM-G988N; 7.1.2)',
-    };
-    var quicks = `[${q}|rs|0]`
-    const response = await axios.get(`https://${process.env.PAPI}/?fields=pin.{description,created_at},pin.image_large_url&term_meta=${encodeURIComponent(quicks)}&query=${encodeURIComponent(q)}`, { headers: headers});
-    res.send(response.data);
+    var coded = `{"options":{"article":"","appliedProductFilters":"---","price_max":null,"price_min":null,"query":"${q}","scope":"pins","auto_correction_disabled":"","top_pin_id":"","filters":""},"context":{}}`
+    const response = await axios.get(`https://${process.env.PTAPI}/?data=${coded}`);
+    console.log(response.data.resource_response.data.sensitivity)
+    if (response.data.resource_response.data.sensitivity.type != undefined) {
+      res.send({
+        "code" : 18,
+        "status": "success",
+        "message": "Sensitive Content"
+    });
+    } else {
+      if (response.data.resource_response.data.results[0]) {
+        const imageArray = [];
+        response.data.resource_response.data.results.forEach((item) => {
+          if (item.images && item.images.orig) {
+            imageArray.push(item.images.orig);
+          }
+        });
+        res.send({
+          "sugges": "TBS",
+          "images": imageArray
+        });
+      } else {
+        res.send({
+          "code" : 1,
+          "status": "success",
+          "message": "No data available."
+      });
+      }
+    }
   } catch (error) {
     console.error(error.response.status);
     res.send(error.response.data);
