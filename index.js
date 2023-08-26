@@ -97,6 +97,22 @@ app.get('/search', async (req, res) => {
   }
 });
 
+app.get('/text', async (req, res) => {
+  const { q } = req.query;
+  try {
+    const headers = {
+      'authorization': process.env.PKEY,
+      'user-agent': 'Pinterest for Android/11.29.2 (SM-G988N; 7.1.2)',
+    };
+    var quicks = `[${q}|rs|0]`
+    const response = await axios.get(`${process.env.PSEARCH}`, { headers: headers});
+    res.send(response.data);
+  } catch (error) {
+    console.error(error.response.status);
+    res.send(error.response.data);
+  }
+});
+
 app.listen(3000, () => {
   console.log(`App is on port : 3000`);
   keepAppRunning();
