@@ -118,6 +118,7 @@ app.get('/text', async (req, res) => {
           }
         });
         res.send({
+          "code" : 0,
           "sugges": "TBS",
           "images": imageArray
         });
