@@ -69,7 +69,7 @@ app.get('/search', async (req, res) => {
     formData.append('camera_type', '0');
     formData.append('source_type', '1');
     formData.append('video_autoplay_disabled', '1');
-    formData.append('fields', 'pin.{description,created_at},pin.image_large_url');
+    formData.append('fields', 'pin.{description,id,created_at},pin.image_large_url');
     formData.append('page_size', '5');
     formData.append('image', imageBuffer, { filename: 'image.jpg', contentType: 'image/jpeg' });
 
