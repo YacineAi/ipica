@@ -115,7 +115,10 @@ app.get('/text', async (req, res) => {
         const imageArray = [];
         response.data.resource_response.data.results.forEach((item) => {
           if (item.images && item.images.orig) {
-            imageArray.push(item.images.orig);
+            imageArray.push({
+              url : item.images.orig.url,
+              id : item.id
+            });
           }
         });
         res.send({
@@ -166,7 +169,7 @@ app.get('/similar', async (req, res) => {
       Cookie: `csrftoken=${randomHex};`,
       'X-CSRFToken': randomHex,
     };
-    
+
     const response = await axios.post(`https://${process.env.SIMIAPI}/`, body, { headers });
 
     const edges = response.data.data.v3RelatedPinsForPinSeoQuery.data.connection.edges;
