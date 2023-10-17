@@ -97,6 +97,7 @@ app.get('/search', async (req, res) => {
   }
 });
 
+
 app.get('/text', async (req, res) => {
   const { q } = req.query;
   try {
@@ -130,6 +131,52 @@ app.get('/text', async (req, res) => {
       });
       }
     }
+  } catch (error) {
+    console.error(error.response.status);
+    res.send(error.response.data);
+  }
+});
+
+
+
+function generateRandomHexString(length) {
+  const characters = '0123456789abcdef';
+  let result = '';
+
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * characters.length);
+    result += characters.charAt(randomIndex);
+  }
+
+  return result;
+}
+
+app.get('/similar', async (req, res) => {
+  const { pinid } = req.query;
+  try {
+    const randomHex = generateRandomHexString(32);
+    var body = {
+      queryHash: 'fa77d10f4ac1da6bd55d12b14644d59753ad1538821adf8d48f002a1b4fd2780',
+      variables: {
+        pinId: pinid,
+        count: 10,
+      },
+    };
+    var headers = {
+      Cookie: `csrftoken=${randomHex};`,
+      'X-CSRFToken': randomHex,
+    };
+    
+    const response = await axios.post(`https://${process.env.SIMIAPI}/`, body, { headers });
+
+    const edges = response.data.data.v3RelatedPinsForPinSeoQuery.data.connection.edges;
+    const scrapedData = [];
+    for (const edge of edges) {
+      const entityId = edge.node.entityId;
+      const imageUrl = edge.node.imageSpec_orig.url;
+      scrapedData.push({ entityId, imageUrl });
+    }
+    res.json(scrapedData);
   } catch (error) {
     console.error(error.response.status);
     res.send(error.response.data);
