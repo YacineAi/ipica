@@ -186,6 +186,47 @@ app.get('/similar', async (req, res) => {
   }
 });
 
+
+
+app.get('/multi', async (req, res) => {
+  const { q } = req.query;
+  try {
+    var coded = `{"options":{"article":"","appliedProductFilters":"---","price_max":null,"price_min":null,"query":"${q}","scope":"pins","auto_correction_disabled":"","top_pin_id":"","filters":""},"context":{}}`
+    const response = await axios.get(`https://${process.env.PTAPI}/?data=${coded}`);
+    //console.log(response.data.resource_response.data.sensitivity)
+    if (response.data.resource_response.data.sensitivity.type != undefined) {
+      res.send({
+        "code" : 18,
+        "status": "success",
+        "message": "Sensitive Content"
+    });
+    } else {
+      if (response.data.resource_response.data.results[0]) {
+        const filter = response.data.resource_response.data.results.filter(obj => obj.carousel_data != null);
+        const extractedData = filter.map(obj => {
+          if (obj.carousel_data && obj.carousel_data.carousel_slots) {
+            return obj.carousel_data.carousel_slots.map(slot => ({
+              id: slot.id,
+              images: slot.images['60x60'].url.replace("60x60", "1200x")
+            }));
+          }
+          return [];
+        });
+        res.send(extractedData);
+      } else {
+        res.send({
+          "code" : 1,
+          "status": "success",
+          "message": "No data available."
+      });
+      }
+    }
+  } catch (error) {
+    console.error(error.response.status);
+    res.send(error.response.data);
+  }
+});
+
 app.listen(3000, () => {
   console.log(`App is on port : 3000`);
   keepAppRunning();
